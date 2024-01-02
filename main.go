@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/url"
+	"os"
+
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,8 +15,17 @@ import (
 )
 
 func main() {
-	uri := "mongodb://localhost:27017/"
 
+	if err := godotenv.Load(); err != nil {
+		log.Println(".env not found")
+	}
+
+	username := os.Getenv("USERMONGO")
+	pass := os.Getenv("PASS")
+	cluster := os.Getenv("CLUSTER")
+
+	uri := fmt.Sprintf("mongodb+srv://%s:%s@%s", url.QueryEscape(username), url.QueryEscape(pass), cluster)
+	fmt.Println(uri)
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		panic(err)
@@ -23,10 +37,10 @@ func main() {
 		}
 	}()
 
-	db := client.Database("praktek-dokter")
+	db := client.Database("klinik-dokter")
 	coll := db.Collection("dokter")
 	// find code goes here
-	filter := bson.D{{`doctor_id`, 1}}
+	filter := bson.D{{Key: `nama`, Value: `evan`}}
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		panic(err)
